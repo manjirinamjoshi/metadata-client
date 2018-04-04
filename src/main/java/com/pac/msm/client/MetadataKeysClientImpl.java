@@ -13,7 +13,6 @@ import com.pac.msm.component.domain.Metadata;
 
 public class MetadataKeysClientImpl implements MetadataKeysClient {
 
-	@Override
 	public Map<String, String> getMetadataKeys(JsonRpcHttpClient client, String type) throws PacException {
 		try {
 			List<Metadata> list = client.invoke("getMetadataKeys", new Object[] { null, type, 100 }, List.class);
@@ -30,7 +29,6 @@ public class MetadataKeysClientImpl implements MetadataKeysClient {
 		}
 	}
 
-	@Override
 	public void saveMetadataKey(JsonRpcHttpClient client, String type, String key, String name) throws PacException {
 		Metadata metadata = new Metadata();
 		Map<String, String> nameMap = new HashMap<String, String>();

@@ -7,9 +7,8 @@ import com.pac.lib.core.common.PacException;
 
 public interface MetadataClient {
 
-	public void saveMetadata(JsonRpcHttpClient client, String dataaccountId,
-			String type, String id, String name, Map<String, String> mappings)
-			throws PacException;
+	public void saveMetadata(JsonRpcHttpClient client, String dataaccountId, String type, String id,
+			String name, Map<String, String> mappings) throws PacException;
 
 	public Map<String, Object> getMetadata(JsonRpcHttpClient client,
 			String dataaccountId, String type, String id) throws PacException;
