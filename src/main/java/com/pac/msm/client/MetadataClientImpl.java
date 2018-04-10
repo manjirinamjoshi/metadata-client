@@ -1,5 +1,6 @@
 package com.pac.msm.client;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -44,7 +45,7 @@ public class MetadataClientImpl implements MetadataClient {
 				Map body = (Map) o.get("body");
 				result = new HashMap<String, Object>();
 				result.put("name", ((Map)body.get("name")).get("en_US"));
-				result.put("mappings", body.get("parameters"));
+				result.put("parameters", body.get("parameters"));
 			}
 			return result;
 		} catch (Throwable e) {
@@ -65,7 +66,7 @@ public class MetadataClientImpl implements MetadataClient {
 				Map body = (Map) o.get("body");
 				result = new HashMap<String, Object>();
 				result.put("name", ((Map)body.get("name")).get("en_US"));
-				result.put("mappings", body.get("parameters"));
+				result.put("parameters", body.get("parameters"));
 			}
 			
 			return result;
@@ -74,20 +75,45 @@ public class MetadataClientImpl implements MetadataClient {
 		}
 	}
 	
-	public Map<String, Map<String, Object>> searchByName(JsonRpcHttpClient client, String dataaccountId, String type, String name) throws MetadataException {
+	public List<Map<String, Object>> searchByName(JsonRpcHttpClient client, String dataaccountId, String type, String name) throws MetadataException {
 		try {
 			if(!name.contains("*")) {
 				name = name + "*";
 			}
-			List<MetadataClientPojo> list = client.invoke("searchByName", new Object[] { null, dataaccountId, type, name }, List.class);
-			Map<String, Map<String, Object>> result = null;
+			List<Map> list = client.invoke("searchByName", new Object[] { null, dataaccountId, type, name }, List.class);
+			List<Map<String, Object>> result = null;
 			if(list!=null && !list.isEmpty()) {
-				result = new HashMap<String, Map<String, Object>>();
-				for (MetadataClientPojo metadata : list) {
+				result = new ArrayList<Map<String, Object>>();
+				com.pac.msm.client.JsonUtil jsonUtil = com.pac.msm.client.JsonUtil.getInstance();
+				for (Map returnedMap : list) {
+					MetadataClientPojo metadata = jsonUtil.convertValue(returnedMap, MetadataClientPojo.class);
 					Map<String, Object> map = new HashMap<String, Object>();
 					map.put("name", metadata.getName().get("en_US"));
-					map.put("mappings", metadata.getParameters());
-					result.put(metadata.getKey().getDbid()+"::"+metadata.getKey().getId(), map);
+					map.put("parameters", metadata.getParameters());
+					map.put(mapTypeToId.valueOf(type).id, metadata.getKey().getId());
+					result.add(map);
+				}
+			}
+			return result;
+		} catch (Throwable e) {
+			throw new MetadataException(e);
+		}
+	}
+	
+	public List<Map<String, Object>> getAllMetadatas(JsonRpcHttpClient client, String dataaccountId, String type) throws MetadataException {
+		try {
+			List<Map> list = client.invoke("getAllMetadataByDbId", new Object[] { null, dataaccountId, type }, List.class);
+			List<Map<String, Object>> result = null;
+			if(list!=null && !list.isEmpty()) {
+				result = new ArrayList<Map<String, Object>>();
+				com.pac.msm.client.JsonUtil jsonUtil = com.pac.msm.client.JsonUtil.getInstance();
+				for (Map returnedMap : list) {
+					MetadataClientPojo metadata = jsonUtil.convertValue(returnedMap, MetadataClientPojo.class);
+					Map<String, Object> map = new HashMap<String, Object>();
+					map.put("name", metadata.getName().get("en_US"));
+					map.put("parameters", metadata.getParameters());
+					map.put(mapTypeToId.valueOf(type).id, metadata.getKey().getId());
+					result.add(map);
 				}
 			}
 			return result;
@@ -110,5 +136,20 @@ public class MetadataClientImpl implements MetadataClient {
 			throw new MetadataException(e);
 		}
 	}
+	
 
+	enum mapTypeToId {
+		
+		SEASON_METADATA("seasonID"),
+		EVENT_METADATA("eventID"),
+		FACILITY_METADATA("venueID"),
+		PERFORMER_METADATA("performerID"),
+		TICKETTIER_METADATA("ticketTierID");
+		
+		private String id;
+		
+		mapTypeToId(String id) {
+			this.id = id;
+		}
+	}
 }

@@ -1,5 +1,6 @@
 package com.pac.msm.client;
 
+import java.util.List;
 import java.util.Map;
 
 import com.googlecode.jsonrpc4j.JsonRpcHttpClient;
@@ -12,7 +13,10 @@ public interface MetadataClient {
 	public Map<String, Object> getMetadata(JsonRpcHttpClient client,
 			String dataaccountId, String type, String id) throws MetadataException;
 	
-	public Map<String, Map<String, Object>> searchByName(
+	public List<Map<String, Object>> getAllMetadatas(JsonRpcHttpClient client,
+			String dataaccountId, String type) throws MetadataException;
+
+	public List<Map<String, Object>> searchByName(
 			JsonRpcHttpClient client, String dataaccountId, String type, String name)
 			throws MetadataException;
 
